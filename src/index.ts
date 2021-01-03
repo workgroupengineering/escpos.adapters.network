@@ -61,6 +61,9 @@ export default class Network extends Adapter {
     return new Promise<void>((resolve) => {
       this.throwIfNeeded();
       this.device.write(Buffer.from(data), null);
+      if (resolve) {
+        resolve();
+      }
     });
   }
 
