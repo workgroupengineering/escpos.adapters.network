@@ -4,7 +4,11 @@
   "description": "Network Adapter for Escpos printer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "files": [
+    "lib/*"
+  ],
   "scripts": {
+    "prepare": "tsc",
     "lint": "eslint --quiet --fix --ignore-path .gitignore --ext .js,.ts . "
   },
   "repository": {
