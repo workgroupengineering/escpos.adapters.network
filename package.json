@@ -1,6 +1,6 @@
 {
   "name": "escpos.adapters.network",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Network Adapter for Escpos printer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,7 +16,7 @@
     "url": "git+https://github.com/workgroupengineering/escpos.adapters.network.git"
   },
   "keywords": [
-    "escpos;esc/pos;network"
+    "escpos", "esc/pos" , "network"
   ],
   "author": "Giuseppe Lippolis",
   "license": "MIT",
