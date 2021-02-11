@@ -13,8 +13,15 @@ export default class Network extends Adapter {
   private retries: number;
   private connected: boolean;
   private forceClose: boolean;
+  private frameSize = 512;
+  private frameWaitTime = 10;
 
-  constructor(address: string, port = 9100, retries = 0) {
+  constructor(
+    address: string,
+    port = 9100,
+    retries = 0,
+    frameOptions?: { Size?: number; waitTime?: number }
+  ) {
     super();
     this.device = new Socket();
     this.retrying = false;
@@ -22,6 +29,10 @@ export default class Network extends Adapter {
     this.retries = 0;
     this.options = { address, port };
     this.connected = false;
+    if (frameOptions) {
+      if (frameOptions.Size) this.frameSize = frameOptions.Size;
+      if (frameOptions.waitTime) this.frameWaitTime = frameOptions.waitTime;
+    }
 
     this.device.on("close", () => {
       this.connected = false;
@@ -41,7 +52,12 @@ export default class Network extends Adapter {
       }
     });
 
-    this.device.on("error", () => (this.connected = false));
+    this.device.on("error", (err) => {
+      /* eslint-disable no-alert, no-console */
+      console.error(err);
+      /* eslint-enable no-alert, no-console */
+      this.connected = false;
+    });
   }
 
   public async open(): Promise<void> {
@@ -57,7 +73,7 @@ export default class Network extends Adapter {
     });
   }
 
-  public async write(data: Uint8Array): Promise<void> {
+  private async writeInternal(data: Uint8Array): Promise<void> {
     return new Promise<void>((resolve) => {
       this.throwIfNeeded();
       this.device.write(Buffer.from(data), null);
@@ -65,6 +81,23 @@ export default class Network extends Adapter {
         resolve();
       }
     });
+  }
+
+  public async write(data: Uint8Array): Promise<void> {
+    const buffer = data;
+    const chunkSize = this.frameSize;
+    const numberOfchunk = Math.ceil(buffer.length / chunkSize);
+    const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    let index = 0;
+    for (index; index < numberOfchunk; index++) {
+      const start = index * chunkSize;
+      const end =
+        start + chunkSize > buffer.length ? buffer.length : start + chunkSize;
+      const chunk = buffer.slice(start, end);
+      await this.writeInternal(chunk);
+      await wait(this.frameWaitTime);
+    }
+    return;
   }
 
   public async close(): Promise<void> {
