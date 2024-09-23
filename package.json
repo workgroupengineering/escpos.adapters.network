@@ -9,6 +9,10 @@
   ],
   "scripts": {
     "prepare": "tsc",
+    "prepack": "tsc",
+    "compile": "tsc",    
+    "pack": "npm run compile && node scripts/createPackageDir.js",
+    "preversion": "node scripts/isMaster.js && npm run lint",
     "lint": "eslint --quiet --fix --ignore-path .gitignore --ext .js,.ts . "
   },
   "repository": {
